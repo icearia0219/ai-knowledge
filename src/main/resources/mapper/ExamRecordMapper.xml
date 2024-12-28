@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hqyj.gyq.mapper.ExamRecordMapper">
+
+    <!-- 映射规则 -->
+    <resultMap id="examRecordResultMap" type="com.aizs.entity.ExamRecord">
+        <id property="examrecordid" column="examrecordid"/>
+        <result property="userid" column="userid"/>
+        <result property="examDate" column="exam_date"/>
+        <result property="score" column="score"/>
+        <result property="correctCount" column="correct_count"/>
+        <result property="totalQuestions" column="total_questions"/>
+        <result property="grade" column="grade"/>
+    </resultMap>
+
+    <!-- 插入考核记录 -->
+    <insert id="insertExamRecord" parameterType="com.aizs.entity.ExamRecord">
+        INSERT INTO `exam_records` (userid, exam_date, score, correct_count, total_questions, grade)
+        VALUES (#{userid}, NOW(), #{score}, #{correctCount}, #{totalQuestions}, #{grade})
+    </insert>
+
+    <!-- 根据用户ID查询考核记录 -->
+    <select id="findByUserId" resultMap="examRecordResultMap">
+        SELECT * FROM `exam_records` WHERE userid = #{userid}
+    </select>
+
+    <!-- 查询所有考核记录 -->
+    <select id="findAllExamRecords" resultMap="examRecordResultMap">
+        SELECT * FROM `exam_records`
+    </select>
+
+    <!-- 根据ID删除考核记录 -->
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM `exam_records` WHERE examrecordid = #{examrecordid}
+    </delete>
+
+</mapper>

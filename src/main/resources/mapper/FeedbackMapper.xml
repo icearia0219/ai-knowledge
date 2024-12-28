@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.aizs.mapper.FeedbackMapper">
+
+    <!-- 根据用户ID查找反馈 -->
+    <select id="findByUserid" parameterType="Long" resultType="com.aizs.entity.Feedback">
+        SELECT * FROM feedbacks WHERE userid = #{userid}
+    </select>
+
+    <!-- 获取所有反馈 -->
+    <select id="findAll" resultType="com.aizs.entity.Feedback">
+        SELECT * FROM feedbacks
+    </select>
+
+    <!-- 插入新反馈 -->
+    <insert id="insert" parameterType="com.aizs.entity.Feedback">
+        INSERT INTO feedbacks (userid, content, created_at)
+        VALUES (#{userid}, #{content}, NOW())
+    </insert>
+
+    <!-- 删除单个反馈 -->
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM feedbacks WHERE feedbackid = #{feedbackid}
+    </delete>
+
+    <!-- 批量删除反馈 -->
+    <delete id="deleteByIds">
+        DELETE FROM feedbacks WHERE feedbackid IN
+        <foreach item="item" index="index" collection="feedbackids" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </delete>
+
+</mapper>
