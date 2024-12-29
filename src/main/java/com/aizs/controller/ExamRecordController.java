@@ -25,7 +25,7 @@ public class ExamRecordController {
     public List<ExamRecord> getExamRecordByUserId(@PathVariable Long userid) {
         return examRecordService.getExamRecordByUserId(userid);
     }
-
+    
     // 管理员导出所有考核记录
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/records/export")

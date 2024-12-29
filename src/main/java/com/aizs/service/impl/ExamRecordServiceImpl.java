@@ -1,17 +1,10 @@
 package com.aizs.service.impl;
 
-
 import com.aizs.Repository.ExamRecordRepository;
 import com.aizs.entity.ExamRecord;
-import com.aizs.mapper.ExamRecordMapper;
 import com.aizs.service.ExamRecordService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -21,11 +14,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-// 服务层实现
 @Service
 public class ExamRecordServiceImpl implements ExamRecordService {
 
@@ -45,45 +35,69 @@ public class ExamRecordServiceImpl implements ExamRecordService {
     @Override
     public ResponseEntity<InputStreamResource> exportAllRecordsToCSV() {
         List<ExamRecord> records = examRecordRepository.findAll();
-        return generateCSV(records);
+        return generateExcel(records);
     }
 
     @Override
     public ResponseEntity<InputStreamResource> exportWorkerRecordToCSV(Long userid) {
         List<ExamRecord> records = examRecordRepository.findByUserid(userid);
-        return generateCSV(records);
+        return generateExcel(records);
     }
 
-    // 生成CSV文件
-    private ResponseEntity<InputStreamResource> generateCSV(List<ExamRecord> records) {
-        try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-             OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8);
-             CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.withHeader(
-                     "Exam Record ID", "User ID", "Exam Date", "Score", "Correct Count", "Total Questions", "Grade"))) {
+    // 生成Excel文件
+    private ResponseEntity<InputStreamResource> generateExcel(List<ExamRecord> records) {
+        try (Workbook workbook = new XSSFWorkbook();
+             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
 
-            for (ExamRecord record : records) {
-                csvPrinter.printRecord(
-                        record.getExamrecordid(),
-                        record.getUserid(),
-                        record.getExamDate(),
-                        record.getScore(),
-                        record.getCorrectCount(),
-                        record.getTotalQuestions(),
-                        record.getGrade()
-                );
+            Sheet sheet = workbook.createSheet("Exam Records");
+
+            // 创建表头
+            Row headerRow = sheet.createRow(0);
+            String[] headers = {
+                    "Exam Record ID", "User ID", "Exam Date",
+                    "Score", "Correct Count", "Total Questions", "Grade"
+            };
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(headers[i]);
+                cell.setCellStyle(getHeaderCellStyle(workbook));
             }
 
-            csvPrinter.flush();
+            // 填充数据
+            int rowIndex = 1;
+            for (ExamRecord record : records) {
+                Row row = sheet.createRow(rowIndex++);
+                row.createCell(0).setCellValue(record.getExamrecordid());
+                row.createCell(1).setCellValue(record.getUserid());
+                row.createCell(2).setCellValue(record.getExamDate().toString());
+                row.createCell(3).setCellValue(record.getScore());
+                row.createCell(4).setCellValue(record.getCorrectCount());
+                row.createCell(5).setCellValue(record.getTotalQuestions());
+                row.createCell(6).setCellValue(record.getGrade());
+            }
+
+            workbook.write(baos);
 
             InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam_records.csv")
-                    .contentType(MediaType.parseMediaType("text/csv"))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=exam_records.xlsx")
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
 
         } catch (Exception e) {
-            throw new RuntimeException("Error generating CSV", e);
+            throw new RuntimeException("Error generating Excel file", e);
         }
+    }
+
+    // 获取表头样式
+    private CellStyle getHeaderCellStyle(Workbook workbook) {
+        CellStyle style = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setBold(true);
+        style.setFont(font);
+        style.setAlignment(HorizontalAlignment.CENTER);
+        style.setVerticalAlignment(VerticalAlignment.CENTER);
+        return style;
     }
 }
