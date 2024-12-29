@@ -12,6 +12,12 @@ import java.util.List;
 // 服务层接口
 public interface ExamRecordService {
 
+    // 删除单条考核记录
+    void deleteExamRecordById(Long examrecordid);
+
+    // 批量删除考核记录
+    void deleteExamRecordsByIds(List<Long> examrecordids);
+
     // 获取所有考核记录
     List<ExamRecord> getAllExamRecords();
 

@@ -1,5 +1,6 @@
 package com.aizs.service.impl;
 
+import com.aizs.mapper.ExamRecordMapper;  // 导入 ExamRecordMapper
 import com.aizs.Repository.ExamRecordRepository;
 import com.aizs.entity.ExamRecord;
 import com.aizs.service.ExamRecordService;
@@ -21,6 +22,21 @@ public class ExamRecordServiceImpl implements ExamRecordService {
 
     @Autowired
     private ExamRecordRepository examRecordRepository;
+
+    // 修改：注入 ExamRecordMapper
+    @Autowired
+    private ExamRecordMapper examRecordMapper;
+
+    @Override
+    public void deleteExamRecordById(Long examrecordid) {
+        examRecordRepository.deleteById(examrecordid);
+    }
+
+    @Override
+    public void deleteExamRecordsByIds(List<Long> examrecordids) {
+        // 修改：通过实例调用 deleteByIds
+        examRecordMapper.deleteByIds(examrecordids);
+    }
 
     @Override
     public List<ExamRecord> getAllExamRecords() {

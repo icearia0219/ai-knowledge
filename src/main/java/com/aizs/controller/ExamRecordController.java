@@ -25,7 +25,7 @@ public class ExamRecordController {
     public List<ExamRecord> getExamRecordByUserId(@PathVariable Long userid) {
         return examRecordService.getExamRecordByUserId(userid);
     }
-    
+
     // 管理员导出所有考核记录
     @PreAuthorize("hasRole('admin')")
     @GetMapping("/records/export")
@@ -48,4 +48,20 @@ public class ExamRecordController {
         System.out.println("Fetched Exam Records: " + records);
         return records;
     }
+    // 管理员删除单条考核记录
+    @PreAuthorize("hasRole('admin')")
+    @DeleteMapping("/records/{examrecordid}")
+    public ResponseEntity<String> deleteExamRecordById(@PathVariable Long examrecordid) {
+        examRecordService.deleteExamRecordById(examrecordid);
+        return ResponseEntity.ok("Record deleted successfully");
+    }
+
+    // 管理员批量删除考核记录
+    @PreAuthorize("hasRole('admin')")
+    @DeleteMapping("/records")
+    public ResponseEntity<String> deleteExamRecordsByIds(@RequestBody List<Long> examrecordids) {
+        examRecordService.deleteExamRecordsByIds(examrecordids);
+        return ResponseEntity.ok("Records deleted successfully");
+    }
+
 }

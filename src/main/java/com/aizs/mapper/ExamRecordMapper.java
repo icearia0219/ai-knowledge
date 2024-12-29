@@ -24,4 +24,12 @@ public interface ExamRecordMapper {
     // 根据ID删除考核记录
     @Delete("DELETE FROM exam_records WHERE examrecordid = #{examrecordid}")
     void deleteById(Long examrecordid);
+    @Delete("<script>" +
+            "DELETE FROM exam_records WHERE examrecordid IN " +
+            "<foreach item='id' collection='list' open='(' separator=',' close=')'>" +
+            "#{id}" +
+            "</foreach>" +
+            "</script>")
+    void deleteByIds(@Param("list") List<Long> ids);
+
 }
